@@ -13,18 +13,18 @@ import 'dart:io';
 */
 
 // Blank lines are stripped.
-RegExp re_whitespace = new RegExp(r"^\s*$");
+RegExp _re_whitespace = new RegExp(r"^\s*$");
 // Comment lines start with a semicolon. This permits leading whitespace.
-RegExp re_comment = new RegExp(r"^\s*;");
+RegExp _re_comment = new RegExp(r"^\s*;");
 // sections and entries can span lines if subsequent lines start with
 // whitespace. See http://tools.ietf.org/html/rfc822.html#section-3.1
-RegExp re_long_header_field = new RegExp(r"^\s");
+RegExp _re_long_header_field = new RegExp(r"^\s");
 // sections are surrounded by square brakets. This does not trim section names.
-RegExp re_section = new RegExp(r"^\s*\[(.*\S.*)]\s*$");
+RegExp _re_section = new RegExp(r"^\s*\[(.*\S.*)]\s*$");
 // entries are made up of a key and a value. The key must have at least one non
 // blank character. The value can be completely blank. This does not trim key
 // or value.
-RegExp re_entry = new RegExp(r"^([^=]+?)=(.*?)$");
+RegExp _re_entry = new RegExp(r"^([^=]+?)=(.*?)$");
 
 class _Parser {
   // The stream of unparsed data
@@ -35,11 +35,11 @@ class _Parser {
   /*
      Strips blank lines.
   */
-  static List<String> _remove_whitespace(List<String> source) => source.where((String line) => ! re_whitespace.hasMatch(line));
+  static List<String> _remove_whitespace(List<String> source) => source.where((String line) => ! _re_whitespace.hasMatch(line));
   /*
      Strips comment lines.
   */
-  static List<String> _remove_comment(List<String> source) => source.where((String line) => ! re_comment.hasMatch(line));
+  static List<String> _remove_comment(List<String> source) => source.where((String line) => ! _re_comment.hasMatch(line));
   /*
      Turns the lines that have been continued over multiple lines into single lines.
   */
@@ -48,7 +48,7 @@ class _Parser {
     String line = '';
 
     for (String current in source) {
-      if ( re_long_header_field.hasMatch(current) ) {
+      if ( _re_long_header_field.hasMatch(current) ) {
         // The leading whitespace makes this a long header field. It is
         // not part of the value.
         line += current.replaceFirst(r"^\s*","");
@@ -101,13 +101,13 @@ class _Parser {
     String section = 'default';
 
     for (String current in _strings) {
-      Match is_section = re_section.firstMatch(current);
+      Match is_section = _re_section.firstMatch(current);
       if ( is_section != null ) {
         section = is_section[1].trim();
         result.add_section(section);
       }
       else {
-        Match is_entry = re_entry.firstMatch(current);
+        Match is_entry = _re_entry.firstMatch(current);
         if ( is_entry != null ) {
           result.set(section, is_entry[1].trim(), is_entry[2].trim());
         }
