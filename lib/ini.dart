@@ -94,8 +94,7 @@ class _Parser {
     new _Parser(file.readAsLinesSync());
 
   /*
-     Creates a Config from the stream. When this completes the stream has been
-     exhausted.
+     Creates a Config from the cleaned list of strings.
   */
   Config _parse() {
     Config result = new Config();
