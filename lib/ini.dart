@@ -87,6 +87,11 @@ class _Parser {
   */
   static Future<_Parser> readFile(File file) =>
     file.readAsLines().then((List<String> strings) => new _Parser(strings));
+  /*
+     Reads the file and creates the parser from the content.
+  */
+  static Future<_Parser> readFileSync(File file) =>
+    new _Parser(file.readAsLinesSync());
 
   /*
      Creates a Config from the stream. When this completes the stream has been
@@ -157,12 +162,24 @@ class Config {
   static Future<Config> readFile(File file) {
     return _Parser.readFile(file).then((_Parser parser) => parser.config);
   }
+  /*
+     Load a Config from the provided file.
+  */
+  static Config readFileSync(File file) {
+    return _Parser.readFileSync(file).config;
+  }
 
   /*
      Write this Config to the file.
   */
   Future<File> writeFile(File file) {
     return file.writeAsString(toString());
+  }
+  /*
+     Write this Config to the file.
+  */
+  Future<File> writeFileSync(File file) {
+    return file.writeAsStringSync(toString());
   }
 
   /*
