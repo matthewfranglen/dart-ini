@@ -24,7 +24,7 @@ RegExp _re_section = new RegExp(r"^\s*\[(.*\S.*)]\s*$");
 // entries are made up of a key and a value. The key must have at least one non
 // blank character. The value can be completely blank. This does not trim key
 // or value.
-RegExp _re_entry = new RegExp(r"^([^=]+?)=(.*?)$");
+RegExp _re_entry = new RegExp(r"^([^=]+)=(.*?)$");
 
 class _Parser {
   // The stream of unparsed data
