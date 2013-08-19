@@ -1,0 +1,6 @@
+name: ini
+version: 0.0.1
+author: Matthew Franglen
+description: Read and write .ini files
+dependencies:
+  unittest: any
