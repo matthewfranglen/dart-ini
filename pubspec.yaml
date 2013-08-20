@@ -1,5 +1,5 @@
 name: ini
-version: 0.0.3
+version: 0.0.4
 author: Matthew Franglen <matthew.franglen@gmail.com>
 homepage: https://github.com/matthewfranglen/dart-ini
 description: Read and write .ini files
