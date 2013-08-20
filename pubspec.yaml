@@ -1,6 +1,7 @@
 name: ini
 version: 0.0.3
 author: Matthew Franglen
+homepage: https://github.com/matthewfranglen/dart-ini
 description: Read and write .ini files
 dependencies:
   unittest: any
