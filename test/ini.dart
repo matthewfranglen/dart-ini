@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:convert';
 import "package:ini/ini.dart";
 import 'package:unittest/unittest.dart';
 
@@ -41,8 +42,8 @@ void compare_configs (Config one, Config two) {
    stream then an empty list will be returned.
 */
 Future<List<String>> listen (stream) =>
-  stream.transform(new StringDecoder())
-        .transform(new LineTransformer())
+  stream.transform(UTF8.decoder)
+        .transform(new LineSplitter())
         .toList();
 
 /*
