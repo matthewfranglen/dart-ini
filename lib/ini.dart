@@ -35,15 +35,15 @@ class _Parser {
   /*
      Strips blank lines.
   */
-  static List<String> _remove_whitespace(List<String> source) => source.where((String line) => ! _re_whitespace.hasMatch(line));
+  static Iterable<String> _remove_whitespace(Iterable<String> source) => source.where((String line) => ! _re_whitespace.hasMatch(line));
   /*
      Strips comment lines.
   */
-  static List<String> _remove_comment(List<String> source) => source.where((String line) => ! _re_comment.hasMatch(line));
+  static Iterable<String> _remove_comment(Iterable<String> source) => source.where((String line) => ! _re_comment.hasMatch(line));
   /*
      Turns the lines that have been continued over multiple lines into single lines.
   */
-  static List<String> _compress_long_header_fields(List<String> source) {
+  static List<String> _compress_long_header_fields(Iterable<String> source) {
     List<String> result = new List<String>();
     String line = '';
 
@@ -90,7 +90,7 @@ class _Parser {
   /*
      Reads the file and creates the parser from the content.
   */
-  static Future<_Parser> readFileSync(File file) =>
+  static _Parser readFileSync(File file) =>
     new _Parser(file.readAsLinesSync());
 
   /*
@@ -177,8 +177,8 @@ class Config {
   /*
      Write this Config to the file.
   */
-  Future<File> writeFileSync(File file) {
-    return file.writeAsStringSync(toString());
+  void writeFileSync(File file) {
+    file.writeAsStringSync(toString());
   }
 
   /*
@@ -275,7 +275,7 @@ class Config {
   */
   List<List<String>> items(String section) {
     Map<String,String> s = this._get_section(section);
-    return s != null ? s.keys.map((String key) => [key, s[key]]) : null;
+    return s != null ? s.keys.map((String key) => [key, s[key]]).toList() : null;
   }
 
   /*

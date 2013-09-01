@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:convert';
 import "package:ini/ini.dart";
 import 'package:unittest/unittest.dart';
 
@@ -15,7 +16,7 @@ List<String> sample_strings = [
    Compares two lists in a consistent way. Needed when there is more than one
    entry in a section, as there is no fixed order for the entries.
 */
-void _compare_list (Iterable<T> one, Iterable<T> two, [var compare = null]) {
+void _compare_list (Iterable one, Iterable two, [var compare = null]) {
   expect(
       new List.from(one)..sort(compare),
       equals(new List.from(two)..sort(compare))
@@ -40,9 +41,9 @@ void compare_configs (Config one, Config two) {
    Returns the process stream as a list of lines. If there is zero output on a
    stream then an empty list will be returned.
 */
-Future<String> listen (stream) =>
-  stream.transform(new StringDecoder())
-        .transform(new LineTransformer())
+Future<List<String>> listen (stream) =>
+  stream.transform(UTF8.decoder)
+        .transform(new LineSplitter())
         .toList();
 
 /*
