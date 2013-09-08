@@ -3,5 +3,5 @@ version: 0.0.5
 author: Matthew Franglen <matthew.franglen@gmail.com>
 homepage: https://github.com/matthewfranglen/dart-ini
 description: Read and write .ini files
-dependencies:
+dev_dependencies:
   unittest: any
