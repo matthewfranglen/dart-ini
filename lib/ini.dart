@@ -14,8 +14,8 @@ import 'dart:io';
 
 // Blank lines are stripped.
 RegExp _re_whitespace = new RegExp(r"^\s*$");
-// Comment lines start with a semicolon. This permits leading whitespace.
-RegExp _re_comment = new RegExp(r"^\s*;");
+// Comment lines start with a semicolon or a hash. This permits leading whitespace.
+RegExp _re_comment = new RegExp(r"^\s*[;#]");
 // sections and entries can span lines if subsequent lines start with
 // whitespace. See http://tools.ietf.org/html/rfc822.html#section-3.1
 RegExp _re_long_header_field = new RegExp(r"^\s");
