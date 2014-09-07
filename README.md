@@ -14,11 +14,13 @@ Read a file:
 
     import "package:ini/ini.dart";
 
-    Config.readFile(new File("config.ini")).then((Config config) => ...);
+    new File("config.ini").readAsLines()
+        .then(Config.fromStrings)
+        .then((Config config) => ...);
 
 Write a file:
 
-    config.writeFile(new File("config.ini"));
+    new File("config.ini").writeAsString(config.toString());
 
 Read options:
 

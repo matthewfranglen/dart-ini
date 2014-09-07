@@ -1,6 +1,5 @@
 library ini;
 import 'dart:async';
-import 'dart:io';
 
 /*
    This library deals with reading and writing ini files. This implements the
@@ -82,16 +81,6 @@ class _Parser {
   */
   static Future<_Parser> fromStream(Stream<String> stream) =>
       stream.toList().then((List<String> strings) => new _Parser(strings));
-  /*
-     Reads the file and creates the parser from the content.
-  */
-  static Future<_Parser> readFile(File file) =>
-    file.readAsLines().then((List<String> strings) => new _Parser(strings));
-  /*
-     Reads the file and creates the parser from the content.
-  */
-  static _Parser readFileSync(File file) =>
-    new _Parser(file.readAsLinesSync());
 
   /*
      Creates a Config from the cleaned list of strings.
@@ -152,33 +141,8 @@ class Config {
      Load a Config from the provided strings. It is assumed that the strings
      have been split on new lines.
   */
-  factory Config.fromStrings(List<String> strings) {
+  static Config fromStrings(List<String> strings) {
     return new _Parser(strings).config;
-  }
-  /*
-     Load a Config from the provided file.
-  */
-  static Future<Config> readFile(File file) {
-    return _Parser.readFile(file).then((_Parser parser) => parser.config);
-  }
-  /*
-     Load a Config from the provided file.
-  */
-  static Config readFileSync(File file) {
-    return _Parser.readFileSync(file).config;
-  }
-
-  /*
-     Write this Config to the file.
-  */
-  Future<File> writeFile(File file) {
-    return file.writeAsString(toString());
-  }
-  /*
-     Write this Config to the file.
-  */
-  void writeFileSync(File file) {
-    file.writeAsStringSync(toString());
   }
 
   /*
