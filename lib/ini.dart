@@ -1,6 +1,5 @@
 library ini;
 import 'dart:async';
-import 'dart:io';
 
 /*
    This library deals with reading and writing ini files. This implements the
@@ -14,8 +13,8 @@ import 'dart:io';
 
 // Blank lines are stripped.
 RegExp _re_whitespace = new RegExp(r"^\s*$");
-// Comment lines start with a semicolon. This permits leading whitespace.
-RegExp _re_comment = new RegExp(r"^\s*;");
+// Comment lines start with a semicolon or a hash. This permits leading whitespace.
+RegExp _re_comment = new RegExp(r"^\s*[;#]");
 // sections and entries can span lines if subsequent lines start with
 // whitespace. See http://tools.ietf.org/html/rfc822.html#section-3.1
 RegExp _re_long_header_field = new RegExp(r"^\s");
@@ -82,16 +81,6 @@ class _Parser {
   */
   static Future<_Parser> fromStream(Stream<String> stream) =>
       stream.toList().then((List<String> strings) => new _Parser(strings));
-  /*
-     Reads the file and creates the parser from the content.
-  */
-  static Future<_Parser> readFile(File file) =>
-    file.readAsLines().then((List<String> strings) => new _Parser(strings));
-  /*
-     Reads the file and creates the parser from the content.
-  */
-  static _Parser readFileSync(File file) =>
-    new _Parser(file.readAsLinesSync());
 
   /*
      Creates a Config from the cleaned list of strings.
@@ -152,33 +141,8 @@ class Config {
      Load a Config from the provided strings. It is assumed that the strings
      have been split on new lines.
   */
-  factory Config.fromStrings(List<String> strings) {
+  static Config fromStrings(List<String> strings) {
     return new _Parser(strings).config;
-  }
-  /*
-     Load a Config from the provided file.
-  */
-  static Future<Config> readFile(File file) {
-    return _Parser.readFile(file).then((_Parser parser) => parser.config);
-  }
-  /*
-     Load a Config from the provided file.
-  */
-  static Config readFileSync(File file) {
-    return _Parser.readFileSync(file).config;
-  }
-
-  /*
-     Write this Config to the file.
-  */
-  Future<File> writeFile(File file) {
-    return file.writeAsString(toString());
-  }
-  /*
-     Write this Config to the file.
-  */
-  void writeFileSync(File file) {
-    file.writeAsStringSync(toString());
   }
 
   /*

@@ -24,11 +24,12 @@ void do_config_things (Config config, String label) {
 }
 
 main() {
-  Config.readFile(file)
+  file.readAsLines()
+    .then(Config.fromStrings)
     .then((Config config) {
       do_config_things(config, "async");
     });
 
-  Config config = Config.readFileSync(file);
-  do_config_things(config, "sync ");
+  Config config = Config.fromStrings(file.readAsLinesSync());
+  do_config_things(config, "sync");
 }
