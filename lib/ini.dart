@@ -12,18 +12,18 @@ import 'dart:async';
 */
 
 // Blank lines are stripped.
-RegExp _re_whitespace = new RegExp(r"^\s*$");
+RegExp _whitespacePattern = new RegExp(r"^\s*$");
 // Comment lines start with a semicolon or a hash. This permits leading whitespace.
-RegExp _re_comment = new RegExp(r"^\s*[;#]");
+RegExp _commentPattern = new RegExp(r"^\s*[;#]");
 // sections and entries can span lines if subsequent lines start with
 // whitespace. See http://tools.ietf.org/html/rfc822.html#section-3.1
-RegExp _re_long_header_field = new RegExp(r"^\s");
+RegExp _longHeaderFieldPattern = new RegExp(r"^\s");
 // sections are surrounded by square brakets. This does not trim section names.
-RegExp _re_section = new RegExp(r"^\s*\[(.*\S.*)]\s*$");
+RegExp _sectionPattern = new RegExp(r"^\s*\[(.*\S.*)]\s*$");
 // entries are made up of a key and a value. The key must have at least one non
 // blank character. The value can be completely blank. This does not trim key
 // or value.
-RegExp _re_entry = new RegExp(r"^([^=]+)=(.*?)$");
+RegExp _entryPattern = new RegExp(r"^([^=]+)=(.*?)$");
 
 class _Parser {
   // The stream of unparsed data
@@ -34,20 +34,20 @@ class _Parser {
   /*
      Strips blank lines.
   */
-  static Iterable<String> _remove_whitespace(Iterable<String> source) => source.where((String line) => ! _re_whitespace.hasMatch(line));
+  static Iterable<String> _removeWhitespace(Iterable<String> source) => source.where((String line) => ! _whitespacePattern.hasMatch(line));
   /*
      Strips comment lines.
   */
-  static Iterable<String> _remove_comment(Iterable<String> source) => source.where((String line) => ! _re_comment.hasMatch(line));
+  static Iterable<String> _removeComments(Iterable<String> source) => source.where((String line) => ! _commentPattern.hasMatch(line));
   /*
      Turns the lines that have been continued over multiple lines into single lines.
   */
-  static List<String> _compress_long_header_fields(Iterable<String> source) {
+  static List<String> _joinLongHeaderFields(Iterable<String> source) {
     List<String> result = new List<String>();
     String line = '';
 
     for (String current in source) {
-      if ( _re_long_header_field.hasMatch(current) ) {
+      if ( _longHeaderFieldPattern.hasMatch(current) ) {
         // The leading whitespace makes this a long header field. It is
         // not part of the value.
         line += current.replaceFirst(r"^\s*","");
@@ -70,7 +70,7 @@ class _Parser {
      Reduce the strings to the lines representing sections and entries and creates the parser.
   */
   _Parser(List<String> strings) {
-    _strings = _compress_long_header_fields(_remove_comment(_remove_whitespace(strings)));
+    _strings = _joinLongHeaderFields(_removeComments(_removeWhitespace(strings)));
   }
   /*
      Splits the string on newline characters and creates the parser from it.
@@ -90,13 +90,13 @@ class _Parser {
     String section = 'default';
 
     for (String current in _strings) {
-      Match is_section = _re_section.firstMatch(current);
+      Match is_section = _sectionPattern.firstMatch(current);
       if ( is_section != null ) {
         section = is_section[1].trim();
-        result.add_section(section);
+        result.addSection(section);
       }
       else {
-        Match is_entry = _re_entry.firstMatch(current);
+        Match is_entry = _entryPattern.firstMatch(current);
         if ( is_entry != null ) {
           result.set(section, is_entry[1].trim(), is_entry[2].trim());
         }
@@ -166,7 +166,7 @@ class Config {
      Returns the section or null if the section does not exist. The string
      'default' (case insensitive) will return the default section.
   */
-  Map<String, String> _get_section(String section) {
+  Map<String, String> _getSection(String section) {
     if ( section.toLowerCase() == 'default' ) {
       return _defaults;
     }
@@ -192,7 +192,7 @@ class Config {
      (or any of it’s case-insensitive variants) is passed, ValueError is
      raised.
   */
-  void add_section(String section) {
+  void addSection(String section) {
     if ( section.toLowerCase() == 'default' ) {
       throw new Exception('ValueError');
     }
@@ -206,13 +206,13 @@ class Config {
      Indicates whether the named section is present in the configuration. The
      DEFAULT section is not acknowledged
   */
-  bool has_section(String section) => _sections.containsKey(section);
+  bool hasSection(String section) => _sections.containsKey(section);
 
   /*
      Returns a list of options available in the specified section.
   */
   Iterable<String> options(String section) {
-    Map<String,String> s = this._get_section(section);
+    Map<String,String> s = this._getSection(section);
     return s != null ? s.keys : null;
   }
 
@@ -220,8 +220,8 @@ class Config {
      If the given section exists, and contains the given option, return True;
      otherwise return False
   */
-  bool has_option(String section, option) {
-    Map<String,String> s = this._get_section(section);
+  bool hasOption(String section, option) {
+    Map<String,String> s = this._getSection(section);
     return s != null ? s.containsKey(option) : false;
   }
 
@@ -229,7 +229,7 @@ class Config {
      Get an option value for the named section.
   */
   String get(String section, option) {
-    Map<String,String> s = this._get_section(section);
+    Map<String,String> s = this._getSection(section);
     return s != null ? s[option] : null;
   }
 
@@ -238,7 +238,7 @@ class Config {
      section
   */
   List<List<String>> items(String section) {
-    Map<String,String> s = this._get_section(section);
+    Map<String,String> s = this._getSection(section);
     return s != null ? s.keys.map((String key) => [key, s[key]]).toList() : null;
   }
 
@@ -247,7 +247,7 @@ class Config {
      otherwise raise NoSectionError.
   */
   void set(String section, option, value) {
-    Map<String,String> s = this._get_section(section);
+    Map<String,String> s = this._getSection(section);
     if ( s == null ) {
       throw new Exception('NoSectionError');
     }
@@ -259,8 +259,8 @@ class Config {
      does not exist, raise NoSectionError. If the option existed to be removed,
      return True; otherwise return False
   */
-  bool remove_option(String section, option) {
-    Map<String,String> s = this._get_section(section);
+  bool removeOption(String section, option) {
+    Map<String,String> s = this._getSection(section);
     if ( s != null ) {
       if ( s.containsKey(option) ) {
         s.remove(option);
@@ -275,7 +275,7 @@ class Config {
       Remove the specified section from the configuration. If the section in
       fact existed, return True. Otherwise return False
   */
-  bool remove_section(String section) {
+  bool removeSection(String section) {
     if ( section.toLowerCase() == 'default' ) {
       // Can't add the default section, so removing is just clearing.
       _defaults.clear();

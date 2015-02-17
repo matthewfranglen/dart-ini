@@ -30,24 +30,24 @@ Read options:
     // List options within a section
     config.options("default");
     config.options("section");
-    config.has_section("section");
+    config.hasSection("section");
 
     // List of key value pairs for a section.
     config.items("section");
 
     // Read specific options.
     config.get("section", "option");
-    config.has_option("section", "option");
+    config.hasOption("section", "option");
 
 Write options:
 
     // Make sure you add sections before using them.
-    config.add_section("section");
+    config.addSection("section");
 
     config.set("section", "option", "value");
 
-    config.remove_section("section");
+    config.removeSection("section");
 
-    config.remove_option("section", "option");
+    config.removeOption("section", "option");
 
 There is example code in the example/ directory.
