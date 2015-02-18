@@ -12,7 +12,8 @@
 
 library ini;
 
-final RegExp _newlinePattern = new RegExp(r"[\r\n]+");
+import 'dart:convert';
+
 final RegExp _blankLinePattern = new RegExp(r"^\s*$");
 final RegExp _commentPattern = new RegExp(r"^\s*[;#]");
 final RegExp _lineContinuationPattern = new RegExp(r"^\s+");
@@ -64,7 +65,7 @@ class _Parser {
   }
 
   _Parser.fromString(String string)
-    : this.fromStrings(string.split(_newlinePattern));
+    : this.fromStrings(new LineSplitter().convert(string));
 
   _Parser.fromStrings(List<String> strings)
     : _strings =
