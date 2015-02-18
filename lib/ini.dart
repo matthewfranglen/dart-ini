@@ -1,30 +1,22 @@
+/// This library deals with reading and writing ini files.
+///
+/// This implements the INI standard,
+/// defined [here](https://en.wikipedia.org/wiki/INI_file).
+///
+/// The ini file reader will return data organized by section and option.
+/// The default section will be the blank string.
+///
+///     new File("config.ini").readAsLines()
+///       .then((lines) => new Config.fromStrings(lines))
+///       .then((Config config) => ...);
+
 library ini;
 
-import 'dart:async';
-
-/// This library deals with reading and writing ini files. This implements the
-/// standard as defined here:
-///
-/// https://en.wikipedia.org/wiki/INI_file
-///
-/// The ini file reader will return data organized by section and option. The
-/// default section will be the blank string.
-
-// Strings are split on newlines
 final RegExp _newlinePattern = new RegExp(r"[\r\n]+");
-// Blank lines are stripped.
 final RegExp _blankLinePattern = new RegExp(r"^\s*$");
-// Comment lines start with a semicolon or a hash.
-// This permits leading whitespace.
 final RegExp _commentPattern = new RegExp(r"^\s*[;#]");
-// sections and entries can span lines if subsequent lines start with
-// whitespace. See http://tools.ietf.org/html/rfc822.html#section-3.1
-final RegExp _longHeaderFieldPattern = new RegExp(r"^\s+");
-// sections are surrounded by square brakets. This does not trim section names.
+final RegExp _lineContinuationPattern = new RegExp(r"^\s+");
 final RegExp _sectionPattern = new RegExp(r"^\s*\[(.*\S.*)]\s*$");
-// entries are made up of a key and a value. The key must have at least one non
-// blank character. The value can be completely blank. This does not trim key
-// or value.
 final RegExp _entryPattern = new RegExp(r"^([^=]+)=(.*?)$");
 
 class _Parser {
@@ -41,15 +33,21 @@ class _Parser {
     source.where((String line) => ! _commentPattern.hasMatch(line));
 
   /// Joins the lines that have been continued over multiple lines.
+  ///
+  /// Sections and entries can span lines if following lines start with
+  /// whitespace. See
+  /// [3.1.1. LONG HEADER FIELDS](http://tools.ietf.org/html/rfc822.html#section-3.1.1)
+  ///
+  ///     return _joinLongHeaderFields(strings);
   static List<String> _joinLongHeaderFields(Iterable<String> source) {
     List<String> result = new List<String>();
     String line = '';
 
     for (String current in source) {
-      if ( _longHeaderFieldPattern.hasMatch(current) ) {
+      if ( _lineContinuationPattern.hasMatch(current) ) {
         // The leading whitespace makes this a long header field.
         // It is not part of the value.
-        line += current.replaceFirst(_longHeaderFieldPattern, "");
+        line += current.replaceFirst(_lineContinuationPattern, "");
       }
       else {
         if ( line != '' ) {
@@ -76,8 +74,7 @@ class _Parser {
           )
         );
 
-  /// Returns the parsed Config.
-  /// The first call will trigger the parse.
+  /// The lazily evaluated parsed config.
   get config {
     if ( _config == null ) {
       _config = _parse();
@@ -85,7 +82,7 @@ class _Parser {
     return _config;
   }
 
-  /// Creates a Config from the cleaned list of strings.
+  /// Returns a Config from the cleaned list of [_strings].
   Config _parse() {
     Config result = new Config();
     String section = 'default';
@@ -112,10 +109,10 @@ class _Parser {
 }
 
 class Config {
-  /// The defaults consist of all entries that are not within a section.
+  /// All entries that are not within a section.
   Map<String, String> _defaults = new Map<String, String>();
 
-  /// The sections contains all entries organized by section.
+  /// All entries organized by section.
   Map<String, Map<String, String>> _sections =
     new Map<String, Map<String, String>>();
 
@@ -129,7 +126,9 @@ class Config {
     return new _Parser.fromStrings(strings).config;
   }
 
-  /// Convert the Config to a parseable string version.
+  /// Return the Config content as a parseable string.
+  ///
+  ///     String reformatted = Config.fromString(original).toString();
   String toString() {
     StringBuffer buffer = new StringBuffer();
 
@@ -145,16 +144,24 @@ class Config {
   }
 
   /// Return a dictionary containing the instance-wide defaults.
+  ///
+  ///     print(config.defaults()["version"]);
   Map<String, String> defaults() => _defaults;
 
-  /// Return a list of the sections available;
+  /// Return a list of the sections available.
+  ///
   /// DEFAULT is not included in the list.
+  ///
+  ///     print(config.sections().first);
   Iterable<String> sections() => _sections.keys;
 
-  /// Add a section with the [name] provided to the config.
-  /// If a section by the given [name] already exists then a
-  /// DuplicateSectionError is raised.
-  /// If the [name] is DEFAULT (case insensitive) then a ValueError is raised.
+  /// Add a new section to the config.
+  ///
+  /// If a section matching the [name] already exists then a
+  /// [DuplicateSectionError] is raised.
+  /// If the [name] is DEFAULT (case insensitive) then a [ValueError] is raised.
+  ///
+  ///     config.addSection("updates");
   void addSection(String name) {
     if ( name.toLowerCase() == 'default' ) {
       throw new Exception('ValueError');
@@ -165,32 +172,40 @@ class Config {
     _sections[name] = new Map<String, String>();
   }
 
-  /// Indicates whether the [name] is an existing section.
+  /// Returns true if there is an existing section called [name].
+  ///
   /// The DEFAULT section is not acknowledged.
+  ///
+  ///     if (config.hasSection("updates")) { ... }
   bool hasSection(String name) => _sections.containsKey(name);
 
-  /// Returns a list of options available in the section with the [name]
-  /// provided.
+  /// Returns a list of options available in the section called [name].
+  ///
+  ///     print(config.options("updates").first);
   Iterable<String> options(String name) {
     Map<String,String> s = this._getSection(name);
     return s != null ? s.keys : null;
   }
 
-  /// If the section with the [name] exists, and contains the given [option],
-  /// return True; otherwise return False
+  /// Returns true if [option] exists within the section called [name].
+  ///
+  ///     if (config.hasOption("updates", "automatic")) { ... }
   bool hasOption(String name, String option) {
     Map<String,String> s = this._getSection(name);
     return s != null ? s.containsKey(option) : false;
   }
 
-  /// Get the [option] value for the section with the [name].
+  /// Returns the value associated with [option] in the section called [name].
+  ///
+  ///     print(config.get("updates", "automatic"));
   String get(String name, option) {
     Map<String,String> s = this._getSection(name);
     return s != null ? s[option] : null;
   }
 
-  /// Return a list of (name, value) pairs for each option in the section with
-  /// the [name].
+  /// Returns a list of option (name, value) pairs in the section called [name].
+  ///
+  ///     print(config.get("updates").first.first);
   List<List<String>> items(String name) {
     Map<String,String> s = this._getSection(name);
     return s != null
@@ -198,8 +213,11 @@ class Config {
       : null;
   }
 
-  /// If the section with the [name] exists, set the given [option] to the
-  /// specified [value]; otherwise raise NoSectionError.
+  /// Sets the [option] to [value] in the section called [name].
+  ///
+  /// If no section called [name] exists this will raise a [NoSectionError].
+  ///
+  ///     config.set("updates", "automatic", "true");
   void set(String name, String option, String value) {
     Map<String,String> s = this._getSection(name);
     if ( s == null ) {
@@ -208,10 +226,12 @@ class Config {
     s[option] = value;
   }
 
-  /// Remove the [option] from the section with the [name].
-  /// If the section does not exist, raise NoSectionError.
-  /// If the option existed and was removed, return True;
-  /// otherwise return False
+  /// Remove the [option] from the section called [name].
+  ///
+  /// If the option existed this will return true.
+  /// If no section called [name] exists this will raise a [NoSectionError].
+  ///
+  ///     config.removeOption("updates", "automatic");
   bool removeOption(String section, String option) {
     Map<String,String> s = this._getSection(section);
     if ( s != null ) {
@@ -224,8 +244,11 @@ class Config {
     throw new Exception('NoSectionError');
   }
 
-  /// Remove the specified section from the configuration.
-  /// If the section in fact existed, return True. Otherwise return False
+  /// Remove the section called [name].
+  ///
+  /// If the section existed this will return true.
+  ///
+  ///     config.removeSection("updates");
   bool removeSection(String section) {
     if ( section.toLowerCase() == 'default' ) {
       // Can't add the default section, so removing is just clearing.
@@ -239,7 +262,10 @@ class Config {
   }
 
   /// Returns the section or null if the section does not exist.
+  ///
   /// The string 'default' (case insensitive) will return the default section.
+  ///
+  ///     print(config._getSection("updates").keys.first);
   Map<String, String> _getSection(String section) {
     if ( section.toLowerCase() == 'default' ) {
       return _defaults;
