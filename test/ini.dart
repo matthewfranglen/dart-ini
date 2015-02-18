@@ -12,19 +12,16 @@ List<String> sample_strings = [
   'ͰͱͲͳʹ͵Ͷͷͻͼͽ;΅Ά·ΈΉΊΌΎΏΐΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩΪΫάέήίΰαβγδεζηθικλμνξοπρςστυφχψωϊϋόύώϏβθΥϓϔφπϗϘϙϚϛϜϝϞϟϠϡϢϣϤϥϦϧϨϩϪϫϬϭϮϯκρςϳΘε϶ϷϸΣϺϻϼϽϾϿ',
 ];
 
-/*
-   Compares two lists in a consistent way. Needed when there is more than one
-   entry in a section, as there is no fixed order for the entries.
-*/
+/// Compares two lists in a consistent way.
+/// Needed when there is more than one entry in a section, as there is no fixed order for the entries.
 void _compareList(Iterable one, Iterable two, [var compare = null]) {
   expect(
       new List.from(one)..sort(compare),
       equals(new List.from(two)..sort(compare))
     );
 }
-/*
-   Compares the configs based on the getter methods available.
-*/
+
+/// Compares the configs based on the getter methods available.
 void compareConfigs(Config one, Config two) {
   _compareList(one.sections(), two.sections());
   for (String section in one.sections()) {
@@ -37,20 +34,15 @@ void compareConfigs(Config one, Config two) {
   }
 }
 
-/*
-   Returns the process stream as a list of lines. If there is zero output on a
-   stream then an empty list will be returned.
-*/
+/// Returns the process stream as a list of lines.
+/// If there is zero output on a stream then an empty list will be returned.
 Future<List<String>> listen(stream) =>
   stream.transform(UTF8.decoder)
         .transform(new LineSplitter())
         .toList();
 
-/*
-   Passes the config object through a python script that just reads the config
-   from standard in and re-writes it to standard out. This allows compatibility
-   with the python version to be checked.
-*/
+/// Passes the config object through a python script that just reads the config from standard in and re-writes it to standard out.
+/// This allows compatibility with the python version to be checked.
 Future<List> comparePython(Config config) =>
   Process.start('python', ['test/ini.py'])
     .then((Process process) {
@@ -63,9 +55,7 @@ Future<List> comparePython(Config config) =>
       ]);
     });
 
-/*
-   This checks that toString and fromString work as advertised
-*/
+/// This checks that toString and fromString work as advertised
 void testSelfParsing () {
   var e = (Config config) { compareConfigs(new Config.fromString(config.toString()), config); };
   test( 'Test empty', () {
@@ -102,12 +92,10 @@ void testSelfParsing () {
   });
 }
 
-/*
-   This checks that the code conforms with the python implementation.
-
-   Current differences:
-    * The handling of the default section is different.
-*/
+/// This checks that the code conforms with the python implementation.
+///
+/// Current differences:
+///  * The handling of the default section is different.
 void testPythonCompliance () {
   var e = (Config config) => comparePython(config);
   test( 'Test empty', () {
@@ -131,3 +119,5 @@ void main () {
   group( 'Self Parsing', testSelfParsing );
   group( 'Python Parsing', testPythonCompliance );
 }
+
+// vim: set ai et sw=2 syntax=dart :

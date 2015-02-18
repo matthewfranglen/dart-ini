@@ -33,3 +33,5 @@ void main() {
   Config config = new Config.fromStrings(file.readAsLinesSync());
   doConfigThings(config, "sync");
 }
+
+// vim: set ai et sw=2 syntax=dart :

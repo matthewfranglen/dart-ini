@@ -1,15 +1,14 @@
 library ini;
+
 import 'dart:async';
 
-/*
-   This library deals with reading and writing ini files. This implements the
-   standard as defined here:
-
-   https://en.wikipedia.org/wiki/INI_file
-
-   The ini file reader will return data organized by section and option. The
-   default section will be the blank string.
-*/
+/// This library deals with reading and writing ini files. This implements the
+/// standard as defined here:
+///
+/// https://en.wikipedia.org/wiki/INI_file
+///
+/// The ini file reader will return data organized by section and option. The
+/// default section will be the blank string.
 
 // Strings are split on newlines
 final RegExp _newlinePattern = new RegExp(r"[\r\n]+");
@@ -28,30 +27,25 @@ final RegExp _sectionPattern = new RegExp(r"^\s*\[(.*\S.*)]\s*$");
 final RegExp _entryPattern = new RegExp(r"^([^=]+)=(.*?)$");
 
 class _Parser {
-  // The stream of unparsed data
+  /// The stream of unparsed data
   List<String> _strings;
-  // The parsed config object
+
+  /// The parsed config object
   Config _config;
 
-  /*
-     Strips blank lines.
-  */
   static Iterable<String> _removeBlankLines(Iterable<String> source) => source.where((String line) => ! _blankLinePattern.hasMatch(line));
-  /*
-     Strips comment lines.
-  */
+
   static Iterable<String> _removeComments(Iterable<String> source) => source.where((String line) => ! _commentPattern.hasMatch(line));
-  /*
-     Turns the lines that have been continued over multiple lines into single lines.
-  */
+
+  /// Turns the lines that have been continued over multiple lines into single lines.
   static List<String> _joinLongHeaderFields(Iterable<String> source) {
     List<String> result = new List<String>();
     String line = '';
 
     for (String current in source) {
       if ( _longHeaderFieldPattern.hasMatch(current) ) {
-        // The leading whitespace makes this a long header field. It is
-        // not part of the value.
+        // The leading whitespace makes this a long header field.
+        // It is not part of the value.
         line += current.replaceFirst(_longHeaderFieldPattern, "");
       }
       else {
@@ -68,20 +62,21 @@ class _Parser {
     return result;
   }
 
-  /*
-     Splits the string on newline characters and creates the parser from it.
-  */
   _Parser.fromString(String string) : this.fromStrings(string.split(_newlinePattern));
-  /*
-     Reduce the strings to the lines representing sections and entries and creates the parser.
-  */
-  _Parser.fromStrings(List<String> strings) {
+
+  _Parser.fromStrings(List<String> strings) :
     _strings = _joinLongHeaderFields(_removeComments(_removeBlankLines(strings)));
+
+  /// Returns the parsed Config.
+  /// The first call will trigger the parse.
+  get config {
+    if ( _config == null ) {
+      _config = _parse();
+    }
+    return _config;
   }
 
-  /*
-     Creates a Config from the cleaned list of strings.
-  */
+  /// Creates a Config from the cleaned list of strings.
   Config _parse() {
     Config result = new Config();
     String section = 'default';
@@ -105,46 +100,26 @@ class _Parser {
 
     return result;
   }
-
-  /*
-     Returns the Config that has been parsed. The first call will trigger the
-     parse.
-  */
-  get config {
-    if ( _config == null ) {
-      _config = this._parse();
-    }
-    return _config;
-  }
 }
 
 class Config {
-  // The defaults consist of all entries that are not within a section.
+  /// The defaults consist of all entries that are not within a section.
   Map<String, String> _defaults = new Map<String, String>();
-  // The sections contains all entries organized by section.
+
+  /// The sections contains all entries organized by section.
   Map<String, Map<String, String>> _sections = new Map<String, Map<String, String>>();
 
-  /*
-     Create a blank config.
-  */
   Config();
-  /*
-     Load a Config from the provided string.
-  */
+
   factory Config.fromString(String string) {
     return new _Parser.fromString(string).config;
   }
-  /*
-     Load a Config from the provided strings. It is assumed that the strings
-     have been split on new lines.
-  */
+
   factory Config.fromStrings(List<String> strings) {
     return new _Parser.fromStrings(strings).config;
   }
 
-  /*
-     Convert the Config to a parseable string version.
-  */
+  /// Convert the Config to a parseable string version.
   String toString() {
     StringBuffer buffer = new StringBuffer();
 
@@ -159,103 +134,68 @@ class Config {
     return buffer.toString();
   }
 
-  /*
-     Returns the section or null if the section does not exist. The string
-     'default' (case insensitive) will return the default section.
-  */
-  Map<String, String> _getSection(String section) {
-    if ( section.toLowerCase() == 'default' ) {
-      return _defaults;
-    }
-    if ( _sections.containsKey(section) ) {
-      return _sections[section];
-    }
-    return null;
-  }
-
-  /*
-     Return a dictionary containing the instance-wide defaults.
-  */
+  /// Return a dictionary containing the instance-wide defaults.
   Map<String, String> defaults() => _defaults;
 
-  /*
-     Return a list of the sections available; DEFAULT is not included in the list.
-  */
+  /// Return a list of the sections available; DEFAULT is not included in the list.
   Iterable<String> sections() => _sections.keys;
 
-  /*
-     Add a section named section to the instance. If a section by the given
-     name already exists, DuplicateSectionError is raised. If the name DEFAULT
-     (or any of it’s case-insensitive variants) is passed, ValueError is
-     raised.
-  */
-  void addSection(String section) {
-    if ( section.toLowerCase() == 'default' ) {
+  /// Add a section with the [name] provided to the config.
+  /// If a section by the given [name] already exists then a DuplicateSectionError is raised.
+  /// If the [name] is DEFAULT (case insensitive) then a ValueError is raised.
+  void addSection(String name) {
+    if ( name.toLowerCase() == 'default' ) {
       throw new Exception('ValueError');
     }
-    if ( _sections.containsKey(section) ) {
+    if ( _sections.containsKey(name) ) {
       throw new Exception('DuplicateSectionError');
     }
-    _sections[section] = new Map<String, String>();
+    _sections[name] = new Map<String, String>();
   }
 
-  /*
-     Indicates whether the named section is present in the configuration. The
-     DEFAULT section is not acknowledged
-  */
-  bool hasSection(String section) => _sections.containsKey(section);
+  /// Indicates whether the [name] is an existing section.
+  /// The DEFAULT section is not acknowledged.
+  bool hasSection(String name) => _sections.containsKey(name);
 
-  /*
-     Returns a list of options available in the specified section.
-  */
-  Iterable<String> options(String section) {
-    Map<String,String> s = this._getSection(section);
+  /// Returns a list of options available in the section with the [name] provided.
+  Iterable<String> options(String name) {
+    Map<String,String> s = this._getSection(name);
     return s != null ? s.keys : null;
   }
 
-  /*
-     If the given section exists, and contains the given option, return True;
-     otherwise return False
-  */
-  bool hasOption(String section, String option) {
-    Map<String,String> s = this._getSection(section);
+  /// If the section with the [name] exists, and contains the given [option], return True;
+  /// otherwise return False
+  bool hasOption(String name, String option) {
+    Map<String,String> s = this._getSection(name);
     return s != null ? s.containsKey(option) : false;
   }
 
-  /*
-     Get an option value for the named section.
-  */
-  String get(String section, String option) {
-    Map<String,String> s = this._getSection(section);
+  /// Get the [option] value for the section with the [name].
+  String get(String name, option) {
+    Map<String,String> s = this._getSection(name);
     return s != null ? s[option] : null;
   }
 
-  /*
-     Return a list of (name, value) pairs for each option in the given
-     section
-  */
-  List<List<String>> items(String section) {
-    Map<String,String> s = this._getSection(section);
+  /// Return a list of (name, value) pairs for each option in the section with the [name].
+  List<List<String>> items(String name) {
+    Map<String,String> s = this._getSection(name);
     return s != null ? s.keys.map((String key) => [key, s[key]]).toList() : null;
   }
 
-  /*
-     If the given section exists, set the given option to the specified value;
-     otherwise raise NoSectionError.
-  */
-  void set(String section, String option, String value) {
-    Map<String,String> s = this._getSection(section);
+  /// If the section with the [name] exists, set the given [option] to the specified [value];
+  /// otherwise raise NoSectionError.
+  void set(String name, String option, String value) {
+    Map<String,String> s = this._getSection(name);
     if ( s == null ) {
       throw new Exception('NoSectionError');
     }
     s[option] = value;
   }
 
-  /*
-     Remove the specified option from the specified section. If the section
-     does not exist, raise NoSectionError. If the option existed to be removed,
-     return True; otherwise return False
-  */
+  /// Remove the [option] from the section with the [name].
+  /// If the section does not exist, raise NoSectionError.
+  /// If the option existed and was removed, return True;
+  /// otherwise return False
   bool removeOption(String section, String option) {
     Map<String,String> s = this._getSection(section);
     if ( s != null ) {
@@ -268,10 +208,8 @@ class Config {
     throw new Exception('NoSectionError');
   }
 
-  /*
-      Remove the specified section from the configuration. If the section in
-      fact existed, return True. Otherwise return False
-  */
+  /// Remove the specified section from the configuration.
+  /// If the section in fact existed, return True. Otherwise return False
   bool removeSection(String section) {
     if ( section.toLowerCase() == 'default' ) {
       // Can't add the default section, so removing is just clearing.
@@ -282,6 +220,18 @@ class Config {
       return true;
     }
     return false;
+  }
+
+  /// Returns the section or null if the section does not exist.
+  /// The string 'default' (case insensitive) will return the default section.
+  Map<String, String> _getSection(String section) {
+    if ( section.toLowerCase() == 'default' ) {
+      return _defaults;
+    }
+    if ( _sections.containsKey(section) ) {
+      return _sections[section];
+    }
+    return null;
   }
 }
 
