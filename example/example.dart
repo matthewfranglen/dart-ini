@@ -23,7 +23,7 @@ void doConfigThings(Config config, String label) {
   print("${label}: ${config.toString()}");
 }
 
-main() {
+void main() {
   file.readAsLines()
     .then(Config.fromStrings)
     .then((Config config) {

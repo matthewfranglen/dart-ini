@@ -66,7 +66,7 @@ Future<List> comparePython(Config config) =>
 /*
    This checks that toString and fromString work as advertised
 */
-testSelfParsing () {
+void testSelfParsing () {
   var e = (Config config) { compareConfigs(new Config.fromString(config.toString()), config); };
   test( 'Test empty', () {
     Config config = new Config();
@@ -108,7 +108,7 @@ testSelfParsing () {
    Current differences:
     * The handling of the default section is different.
 */
-testPythonCompliance () {
+void testPythonCompliance () {
   var e = (Config config) => comparePython(config);
   test( 'Test empty', () {
     Config config = new Config();
@@ -127,7 +127,7 @@ testPythonCompliance () {
   // TODO: Python does not agree with default section handling
 }
 
-main () {
+void main () {
   group( 'Self Parsing', testSelfParsing );
   group( 'Python Parsing', testPythonCompliance );
 }

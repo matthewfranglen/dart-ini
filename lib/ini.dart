@@ -76,11 +76,6 @@ class _Parser {
      Splits the string on newline characters and creates the parser from it.
   */
   _Parser.fromString(String string) : this(string.split(new RegExp(r"[\r\n]+")));
-  /*
-     Reduce the strings to the lines representing sections and entries and creates the parser.
-  */
-  static Future<_Parser> fromStream(Stream<String> stream) =>
-      stream.toList().then((List<String> strings) => new _Parser(strings));
 
   /*
      Creates a Config from the cleaned list of strings.
@@ -220,7 +215,7 @@ class Config {
      If the given section exists, and contains the given option, return True;
      otherwise return False
   */
-  bool hasOption(String section, option) {
+  bool hasOption(String section, String option) {
     Map<String,String> s = this._getSection(section);
     return s != null ? s.containsKey(option) : false;
   }
@@ -228,7 +223,7 @@ class Config {
   /*
      Get an option value for the named section.
   */
-  String get(String section, option) {
+  String get(String section, String option) {
     Map<String,String> s = this._getSection(section);
     return s != null ? s[option] : null;
   }
@@ -246,7 +241,7 @@ class Config {
      If the given section exists, set the given option to the specified value;
      otherwise raise NoSectionError.
   */
-  void set(String section, option, value) {
+  void set(String section, String option, String value) {
     Map<String,String> s = this._getSection(section);
     if ( s == null ) {
       throw new Exception('NoSectionError');
@@ -259,7 +254,7 @@ class Config {
      does not exist, raise NoSectionError. If the option existed to be removed,
      return True; otherwise return False
   */
-  bool removeOption(String section, option) {
+  bool removeOption(String section, String option) {
     Map<String,String> s = this._getSection(section);
     if ( s != null ) {
       if ( s.containsKey(option) ) {
