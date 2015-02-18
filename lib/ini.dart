@@ -199,7 +199,7 @@ class Config {
   /// Returns the value associated with [option] in the section called [name].
   ///
   ///     print(config.get("updates", "automatic"));
-  String get(String name, option) {
+  String get(String name, String option) {
     Map<String,String> s = this._getSection(name);
     return s != null ? s[option] : null;
   }
