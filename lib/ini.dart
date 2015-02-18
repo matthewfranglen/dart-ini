@@ -65,16 +65,16 @@ class _Parser {
     return result;
   }
 
-  _Parser.fromString(String string) :
-    this.fromStrings(string.split(_newlinePattern));
+  _Parser.fromString(String string)
+    : this.fromStrings(string.split(_newlinePattern));
 
-  _Parser.fromStrings(List<String> strings) :
-    _strings =
-      _joinLongHeaderFields(
-        _removeComments(
-          _removeBlankLines(strings)
-        )
-      );
+  _Parser.fromStrings(List<String> strings)
+    : _strings =
+        _joinLongHeaderFields(
+          _removeComments(
+            _removeBlankLines(strings)
+          )
+        );
 
   /// Returns the parsed Config.
   /// The first call will trigger the parse.
