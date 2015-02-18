@@ -15,7 +15,7 @@ Read a file:
     import "package:ini/ini.dart";
 
     new File("config.ini").readAsLines()
-        .then(Config.fromStrings)
+        .then((lines) => new Config.fromStrings(lines))
         .then((Config config) => ...);
 
 Write a file:

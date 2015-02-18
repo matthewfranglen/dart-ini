@@ -67,15 +67,15 @@ class _Parser {
   }
 
   /*
-     Reduce the strings to the lines representing sections and entries and creates the parser.
-  */
-  _Parser(List<String> strings) {
-    _strings = _joinLongHeaderFields(_removeComments(_removeWhitespace(strings)));
-  }
-  /*
      Splits the string on newline characters and creates the parser from it.
   */
-  _Parser.fromString(String string) : this(string.split(new RegExp(r"[\r\n]+")));
+  _Parser.fromString(String string) : this.fromStrings(string.split(new RegExp(r"[\r\n]+")));
+  /*
+     Reduce the strings to the lines representing sections and entries and creates the parser.
+  */
+  _Parser.fromStrings(List<String> strings) {
+    _strings = _joinLongHeaderFields(_removeComments(_removeWhitespace(strings)));
+  }
 
   /*
      Creates a Config from the cleaned list of strings.
@@ -136,8 +136,8 @@ class Config {
      Load a Config from the provided strings. It is assumed that the strings
      have been split on new lines.
   */
-  static Config fromStrings(List<String> strings) {
-    return new _Parser(strings).config;
+  factory Config.fromStrings(List<String> strings) {
+    return new _Parser.fromStrings(strings).config;
   }
 
   /*

@@ -58,7 +58,7 @@ Future<List> comparePython(Config config) =>
 
       return Future.wait([
         process.stdin.close(),
-        listen(process.stdout).then((List<String> data) => compareConfigs(Config.fromStrings(data), config)),
+        listen(process.stdout).then((List<String> data) => compareConfigs(new Config.fromStrings(data), config)),
         listen(process.stderr).then((List<String> error) => expect(error, equals([])))
       ]);
     });
