@@ -13,7 +13,8 @@ List<String> sample_strings = [
 ];
 
 /// Compares two lists in a consistent way.
-/// Needed when there is more than one entry in a section, as there is no fixed order for the entries.
+/// Needed when there is more than one entry in a section, as there is no fixed
+/// order for the entries.
 void _compareList(Iterable one, Iterable two, [var compare = null]) {
   expect(
       new List.from(one)..sort(compare),
@@ -41,7 +42,8 @@ Future<List<String>> listen(stream) =>
         .transform(new LineSplitter())
         .toList();
 
-/// Passes the config object through a python script that just reads the config from standard in and re-writes it to standard out.
+/// Passes the config object through a python script that just reads the config
+/// from standard in and re-writes it to standard out.
 /// This allows compatibility with the python version to be checked.
 Future<List> comparePython(Config config) =>
   Process.start('python', ['test/ini.py'])
@@ -50,14 +52,20 @@ Future<List> comparePython(Config config) =>
 
       return Future.wait([
         process.stdin.close(),
-        listen(process.stdout).then((List<String> data) => compareConfigs(new Config.fromStrings(data), config)),
-        listen(process.stderr).then((List<String> error) => expect(error, equals([])))
+        listen(process.stdout)
+          .then((List<String> data) =>
+            compareConfigs(new Config.fromStrings(data), config)
+          ),
+        listen(process.stderr)
+          .then((List<String> error) => expect(error, equals([])))
       ]);
     });
 
 /// This checks that toString and fromString work as advertised
 void testSelfParsing () {
-  var e = (Config config) { compareConfigs(new Config.fromString(config.toString()), config); };
+  var e = (Config config) {
+    compareConfigs(new Config.fromString(config.toString()), config);
+  };
   test( 'Test empty', () {
     Config config = new Config();
     e(config);

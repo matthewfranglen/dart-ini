@@ -14,7 +14,8 @@ import 'dart:async';
 final RegExp _newlinePattern = new RegExp(r"[\r\n]+");
 // Blank lines are stripped.
 final RegExp _blankLinePattern = new RegExp(r"^\s*$");
-// Comment lines start with a semicolon or a hash. This permits leading whitespace.
+// Comment lines start with a semicolon or a hash.
+// This permits leading whitespace.
 final RegExp _commentPattern = new RegExp(r"^\s*[;#]");
 // sections and entries can span lines if subsequent lines start with
 // whitespace. See http://tools.ietf.org/html/rfc822.html#section-3.1
@@ -33,11 +34,13 @@ class _Parser {
   /// The parsed config object
   Config _config;
 
-  static Iterable<String> _removeBlankLines(Iterable<String> source) => source.where((String line) => ! _blankLinePattern.hasMatch(line));
+  static Iterable<String> _removeBlankLines(Iterable<String> source) =>
+    source.where((String line) => ! _blankLinePattern.hasMatch(line));
 
-  static Iterable<String> _removeComments(Iterable<String> source) => source.where((String line) => ! _commentPattern.hasMatch(line));
+  static Iterable<String> _removeComments(Iterable<String> source) =>
+    source.where((String line) => ! _commentPattern.hasMatch(line));
 
-  /// Turns the lines that have been continued over multiple lines into single lines.
+  /// Joins the lines that have been continued over multiple lines.
   static List<String> _joinLongHeaderFields(Iterable<String> source) {
     List<String> result = new List<String>();
     String line = '';
@@ -62,10 +65,16 @@ class _Parser {
     return result;
   }
 
-  _Parser.fromString(String string) : this.fromStrings(string.split(_newlinePattern));
+  _Parser.fromString(String string) :
+    this.fromStrings(string.split(_newlinePattern));
 
   _Parser.fromStrings(List<String> strings) :
-    _strings = _joinLongHeaderFields(_removeComments(_removeBlankLines(strings)));
+    _strings =
+      _joinLongHeaderFields(
+        _removeComments(
+          _removeBlankLines(strings)
+        )
+      );
 
   /// Returns the parsed Config.
   /// The first call will trigger the parse.
@@ -107,7 +116,8 @@ class Config {
   Map<String, String> _defaults = new Map<String, String>();
 
   /// The sections contains all entries organized by section.
-  Map<String, Map<String, String>> _sections = new Map<String, Map<String, String>>();
+  Map<String, Map<String, String>> _sections =
+    new Map<String, Map<String, String>>();
 
   Config();
 
@@ -137,11 +147,13 @@ class Config {
   /// Return a dictionary containing the instance-wide defaults.
   Map<String, String> defaults() => _defaults;
 
-  /// Return a list of the sections available; DEFAULT is not included in the list.
+  /// Return a list of the sections available;
+  /// DEFAULT is not included in the list.
   Iterable<String> sections() => _sections.keys;
 
   /// Add a section with the [name] provided to the config.
-  /// If a section by the given [name] already exists then a DuplicateSectionError is raised.
+  /// If a section by the given [name] already exists then a
+  /// DuplicateSectionError is raised.
   /// If the [name] is DEFAULT (case insensitive) then a ValueError is raised.
   void addSection(String name) {
     if ( name.toLowerCase() == 'default' ) {
@@ -157,14 +169,15 @@ class Config {
   /// The DEFAULT section is not acknowledged.
   bool hasSection(String name) => _sections.containsKey(name);
 
-  /// Returns a list of options available in the section with the [name] provided.
+  /// Returns a list of options available in the section with the [name]
+  /// provided.
   Iterable<String> options(String name) {
     Map<String,String> s = this._getSection(name);
     return s != null ? s.keys : null;
   }
 
-  /// If the section with the [name] exists, and contains the given [option], return True;
-  /// otherwise return False
+  /// If the section with the [name] exists, and contains the given [option],
+  /// return True; otherwise return False
   bool hasOption(String name, String option) {
     Map<String,String> s = this._getSection(name);
     return s != null ? s.containsKey(option) : false;
@@ -176,14 +189,17 @@ class Config {
     return s != null ? s[option] : null;
   }
 
-  /// Return a list of (name, value) pairs for each option in the section with the [name].
+  /// Return a list of (name, value) pairs for each option in the section with
+  /// the [name].
   List<List<String>> items(String name) {
     Map<String,String> s = this._getSection(name);
-    return s != null ? s.keys.map((String key) => [key, s[key]]).toList() : null;
+    return s != null
+      ? s.keys.map((String key) => [key, s[key]]).toList()
+      : null;
   }
 
-  /// If the section with the [name] exists, set the given [option] to the specified [value];
-  /// otherwise raise NoSectionError.
+  /// If the section with the [name] exists, set the given [option] to the
+  /// specified [value]; otherwise raise NoSectionError.
   void set(String name, String option, String value) {
     Map<String,String> s = this._getSection(name);
     if ( s == null ) {
