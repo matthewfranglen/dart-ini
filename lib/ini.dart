@@ -11,19 +11,21 @@ import 'dart:async';
    default section will be the blank string.
 */
 
+// Strings are split on newlines
+final RegExp _newlinePattern = new RegExp(r"[\r\n]+");
 // Blank lines are stripped.
-RegExp _whitespacePattern = new RegExp(r"^\s*$");
+final RegExp _blankLinePattern = new RegExp(r"^\s*$");
 // Comment lines start with a semicolon or a hash. This permits leading whitespace.
-RegExp _commentPattern = new RegExp(r"^\s*[;#]");
+final RegExp _commentPattern = new RegExp(r"^\s*[;#]");
 // sections and entries can span lines if subsequent lines start with
 // whitespace. See http://tools.ietf.org/html/rfc822.html#section-3.1
-RegExp _longHeaderFieldPattern = new RegExp(r"^\s");
+final RegExp _longHeaderFieldPattern = new RegExp(r"^\s+");
 // sections are surrounded by square brakets. This does not trim section names.
-RegExp _sectionPattern = new RegExp(r"^\s*\[(.*\S.*)]\s*$");
+final RegExp _sectionPattern = new RegExp(r"^\s*\[(.*\S.*)]\s*$");
 // entries are made up of a key and a value. The key must have at least one non
 // blank character. The value can be completely blank. This does not trim key
 // or value.
-RegExp _entryPattern = new RegExp(r"^([^=]+)=(.*?)$");
+final RegExp _entryPattern = new RegExp(r"^([^=]+)=(.*?)$");
 
 class _Parser {
   // The stream of unparsed data
@@ -34,7 +36,7 @@ class _Parser {
   /*
      Strips blank lines.
   */
-  static Iterable<String> _removeWhitespace(Iterable<String> source) => source.where((String line) => ! _whitespacePattern.hasMatch(line));
+  static Iterable<String> _removeBlankLines(Iterable<String> source) => source.where((String line) => ! _blankLinePattern.hasMatch(line));
   /*
      Strips comment lines.
   */
@@ -50,7 +52,7 @@ class _Parser {
       if ( _longHeaderFieldPattern.hasMatch(current) ) {
         // The leading whitespace makes this a long header field. It is
         // not part of the value.
-        line += current.replaceFirst(r"^\s*","");
+        line += current.replaceFirst(_longHeaderFieldPattern, "");
       }
       else {
         if ( line != '' ) {
@@ -69,12 +71,12 @@ class _Parser {
   /*
      Splits the string on newline characters and creates the parser from it.
   */
-  _Parser.fromString(String string) : this.fromStrings(string.split(new RegExp(r"[\r\n]+")));
+  _Parser.fromString(String string) : this.fromStrings(string.split(_newlinePattern));
   /*
      Reduce the strings to the lines representing sections and entries and creates the parser.
   */
   _Parser.fromStrings(List<String> strings) {
-    _strings = _joinLongHeaderFields(_removeComments(_removeWhitespace(strings)));
+    _strings = _joinLongHeaderFields(_removeComments(_removeBlankLines(strings)));
   }
 
   /*
