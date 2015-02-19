@@ -1,6 +1,6 @@
 part of ini;
 
-class _ConfigImpl implements Config {
+class _ConfigImpl extends BackwardsCompatibilityMixin implements Config {
   /// All entries that are not within a section.
   Map<String, String> _defaults = new Map<String, String>();
 
