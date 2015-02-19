@@ -3,18 +3,18 @@ import 'dart:io';
 
 File file = new File("example/config.ini");
 
-void do_config_things (Config config, String label) {
+void doConfigThings(Config config, String label) {
   print("${label}: loaded config from ${file.path}");
   print('');
 
   print("${label}: Read some values...");
-  print("${label}: ${config.has_option('default', 'default')}");
+  print("${label}: ${config.hasOption('default', 'default')}");
   print("${label}: ${config.defaults()["default"]}");
   print("${label}: ${config.get("section", "section")}");
   print('');
 
   print("${label}: Write some values...");
-  config.add_section("new");
+  config.addSection("new");
   config.set("new", "entry", "result");
   print("${label}: Added a new section and entry");
   print('');
@@ -23,13 +23,15 @@ void do_config_things (Config config, String label) {
   print("${label}: ${config.toString()}");
 }
 
-main() {
+void main() {
   file.readAsLines()
-    .then(Config.fromStrings)
+    .then((lines) => new Config.fromStrings(lines))
     .then((Config config) {
-      do_config_things(config, "async");
+      doConfigThings(config, "async");
     });
 
-  Config config = Config.fromStrings(file.readAsLinesSync());
-  do_config_things(config, "sync");
+  Config config = new Config.fromStrings(file.readAsLinesSync());
+  doConfigThings(config, "sync");
 }
+
+// vim: set ai et sw=2 syntax=dart :
