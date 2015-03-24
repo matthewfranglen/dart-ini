@@ -85,42 +85,6 @@ void main () {
     );
   });
 
-  group('Given a blank Config\n\t', () {
-    Future<Config> config;
-
-    setUp(() {
-      config = given(newConfigFromString);
-    });
-
-    test('When I add a section\n\t Then the section is present using the old method',
-      () => config.then(addSection).then(addedSectionIsPresentUsingOldMethod)
-    );
-    test('When I add a section using the old method\n\t Then the section is present',
-      () => config.then(addSectionUsingOldMethod).then(addedSectionIsPresent)
-    );
-    test('When I add a section using the old method\n\t Then the section is present using the old method',
-      () => config.then(addSectionUsingOldMethod).then(addedSectionIsPresentUsingOldMethod)
-    );
-
-    test('When I add an option\n\t Then the option is present using the old method',
-      () => config.then(addOption).then(addedOptionIsPresentUsingOldMethod)
-    );
-    test('When I add an option using the old method\n\t Then the option is present',
-      () => config.then(addOptionUsingOldMethod).then(addedOptionIsPresent)
-    );
-    test('When I add an option using the old method\n\t Then the option is present using the old method',
-      () => config.then(addOptionUsingOldMethod).then(addedOptionIsPresentUsingOldMethod)
-    );
-
-    test('When I add an option using the old method\n\t Then the option is correct',
-      () => config.then(addOptionUsingOldMethod).then(addedOptionIsCorrect)
-    );
-
-    test('When I add a default option\n\t Then the default option is present using the old method',
-      () => config.then(addDefaultOption).then(addedDefaultOptionIsPresentUsingOldMethod)
-    );
-  });
-
 }
 
 typedef dynamic Clause();
@@ -189,19 +153,8 @@ Config addSection(Config config) {
   return config;
 }
 
-Config addSectionUsingOldMethod(Config config) {
-  config.add_section("new section");
-  return config;
-}
-
 Config addOption(Config config) {
   config.addSection("new section");
-  config.set("new section", "new option", "new value");
-  return config;
-}
-
-Config addOptionUsingOldMethod(Config config) {
-  config.add_section("new section");
   config.set("new section", "new option", "new value");
   return config;
 }
@@ -215,16 +168,8 @@ void addedSectionIsPresent(Config config) {
   expect(config.hasSection("new section"), isTrue);
 }
 
-void addedSectionIsPresentUsingOldMethod(Config config) {
-  expect(config.has_section("new section"), isTrue);
-}
-
 void addedOptionIsPresent(Config config) {
   expect(config.hasOption("new section", "new option"), isTrue);
-}
-
-void addedOptionIsPresentUsingOldMethod(Config config) {
-  expect(config.has_option("new section", "new option"), isTrue);
 }
 
 void addedOptionIsCorrect(Config config) {
@@ -233,10 +178,6 @@ void addedOptionIsCorrect(Config config) {
 
 void addedDefaultOptionIsPresent(Config config) {
   expect(config.hasOption("default", "new default option"), isTrue);
-}
-
-void addedDefaultOptionIsPresentUsingOldMethod(Config config) {
-  expect(config.has_option("default", "new default option"), isTrue);
 }
 
 void addedDefaultOptionIsCorrect(Config config) {
