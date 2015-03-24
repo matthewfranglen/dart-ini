@@ -17,7 +17,7 @@ import 'dart:convert';
 part 'src/model.dart';
 part 'src/parser.dart';
 
-abstract class Config implements BackwardsCompatibilityMixin {
+abstract class Config {
 
   factory Config() {
     return new _ConfigImpl();
@@ -104,36 +104,6 @@ abstract class Config implements BackwardsCompatibilityMixin {
   /// If the section existed this will return true.
   ///
   ///     config.removeSection("updates");
-  bool removeSection(String section);
-}
-
-abstract class BackwardsCompatibilityMixin {
-
-  /// _Deprecated: Use [addSection] instead._
-  @Deprecated("2015-03-20")
-  void add_section(String section) {
-    addSection(section);
-  }
-  void addSection(String name);
-
-  /// _Deprecated: Use [hasSection] instead._
-  @Deprecated("2015-03-20")
-  bool has_section(String section) => hasSection(section);
-  bool hasSection(String name);
-
-  /// _Deprecated: Use [hasOption] instead._
-  @Deprecated("2015-03-20")
-  bool has_option(String section, option) => hasOption(section, option);
-  bool hasOption(String name, String option);
-
-  /// _Deprecated: Use [removeOption] instead._
-  @Deprecated("2015-03-20")
-  bool remove_option(String section, option) => removeOption(section, option);
-  bool removeOption(String section, String option);
-
-  /// _Deprecated: Use [removeSection] instead._
-  @Deprecated("2015-03-20")
-  bool remove_section(String section) => removeSection(section);
   bool removeSection(String section);
 }
 
