@@ -4,7 +4,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:ini/ini.dart';
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 
 /// This is the path from the folder containing this file to the root of the project
 final String rootFolder = '..';
