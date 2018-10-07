@@ -1,7 +1,7 @@
 name: ini
 version: 1.1.0
 author: Matthew Franglen <matthew.franglen@gmail.com>
-homepage: https://github.com/matthewfranglen/dart-ini
+homepage: https://gitlab.com/matthewfranglen/dart-ini
 description: Read and write .ini files
 dev_dependencies:
   test: any
