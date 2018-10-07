@@ -7,7 +7,7 @@ import 'package:ini/ini.dart';
 import 'package:test/test.dart';
 
 /// This is the path from the folder containing this file to the root of the project
-final String rootFolder = '..';
+final String rootFolder = '.';
 
 void main () {
   group('', () {
@@ -80,17 +80,14 @@ void main () {
     test('When I create a Config from a toString() call\n\t Then the new Config matches the callee',
       () => config.then(createConfigFromConfigToString).then(bothConfigsMatch)
     );
-    test('When I create a Config by passing through python\n\t Then the new Config matches the original',
-      () => config.then(createConfigFromPythonEcho).then(bothConfigsMatch)
-    );
   });
 
 }
 
 typedef dynamic Clause();
 
-Future<dynamic> given(Clause clause) => new Future.value(clause());
-Future<dynamic> when(Clause clause) => new Future.value(clause());
+Future<Config> given(Clause clause) => new Future.value(clause());
+Future<Config> when(Clause clause) => new Future.value(clause());
 
 Config newConfig() => new Config();
 
@@ -199,7 +196,7 @@ Future<List<Config>> createConfigFromPythonEcho(Config config) {
 
 Future<String> invokePythonEcho(Config config) {
   Future<String> listen(stream) =>
-    stream.transform(UTF8.decoder)
+    stream.transform(utf8.decoder)
       .fold('', (String accumulated, String current) => accumulated + current);
 
   return Process.start('python', ["${rootFolder}/tool/ini_echo.py"])
